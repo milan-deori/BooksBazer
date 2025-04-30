@@ -9,21 +9,31 @@ import { useState, useEffect } from "react";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     const status = localStorage.getItem("isLoggedIn");
-    if (status === "true") {
+    const storedUser = localStorage.getItem("user");
+    if (status === "true" && storedUser) {
       setIsLoggedIn(true);
+      setUser(JSON.parse(storedUser));
     }
   }, []);
 
-
   return (
     <BrowserRouter>
-       <Header isLoggedIn={isLoggedIn} />
+      <Header
+  isLoggedIn={isLoggedIn}
+  setIsLoggedIn={setIsLoggedIn}
+  user={user}
+  setUser={setUser}
+/>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn}/>} />
+        <Route path="/login" element={
+          <Login setIsLoggedIn={setIsLoggedIn} setUser={setUser} />
+
+        } />
         <Route path="/signup" element={<Signup />} />
       </Routes>
       <ToastContainer position="top-center" autoClose={2000} />
@@ -32,5 +42,6 @@ function App() {
 }
 
 export default App;
+
 
 

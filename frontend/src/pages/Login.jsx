@@ -4,7 +4,7 @@ import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const Login = ({ setIsLoggedIn }) => {
+const Login = ({ setIsLoggedIn, setUser }) => {
   const [form, setForm] = useState({ email: "", password: "" });
   const navigate = useNavigate();
 
@@ -23,13 +23,19 @@ const Login = ({ setIsLoggedIn }) => {
     try {
       const response = await axios.post("http://localhost:3000/login", form);
 
+      
+
       // ✅ If login successful, update state & localStorage
+      localStorage.setItem("isLoggedIn", true);
+      localStorage.setItem("token", response.data.token); // store JWT token
+      localStorage.setItem("userId", response.data.user._id); // store user ID
+      localStorage.setItem("user", JSON.stringify(response.data.user)); // store name, email etc.
       setIsLoggedIn(true);
-      localStorage.setItem("isLoggedIn", "true");
-
+      setUser(response.data.user);
       toast.success("Login successful!", { autoClose: 2000 });
+      setTimeout(() => navigate("/"), 1000); // Redirect to home after 1 second
 
-      setTimeout(() => navigate("/"), 1000);
+      
     } catch (error) {
       if (error.response && error.response.status === 400) {
         toast.error("Please enter all fields");
