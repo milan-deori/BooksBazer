@@ -3,6 +3,7 @@ import Header from './components/Header';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import Sell from './pages/Sell';
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useState, useEffect } from "react";
@@ -35,6 +36,7 @@ function App() {
 
         } />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/sell" element={<Sell user={user} />}/>
       </Routes>
       <ToastContainer position="top-center" autoClose={2000} />
     </BrowserRouter>

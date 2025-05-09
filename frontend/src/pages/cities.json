@@ -1,0 +1,210 @@
+{
+  "Andhra Pradesh": [
+    "Visakhapatnam",
+    "Vijayawada",
+    "Guntur"
+  ],
+  "Arunachal Pradesh": [
+    "Itanagar",
+    "Tawang",
+    "Ziro"
+  ],
+  "Assam": [
+    "Guwahati",
+    "Silchar",
+    "Dibrugarh"
+  ],
+  "Bihar": [
+    "Patna",
+    "Gaya",
+    "Bhagalpur"
+  ],
+  "Chhattisgarh": [
+    "Raipur",
+    "Bhilai",
+    "Bilaspur"
+  ],
+  "Goa": [
+    "Panaji",
+    "Margao",
+    "Vasco da Gama"
+  ],
+  "Gujarat": [
+    "Ahmedabad",
+    "Surat",
+    "Vadodara"
+  ],
+  "Haryana": [
+    "Chandigarh",
+    "Faridabad",
+    "Gurgaon"
+  ],
+  "Himachal Pradesh": [
+    "Shimla",
+    "Manali",
+    "Dharamshala"
+  ],
+  "Jharkhand": [
+    "Ranchi",
+    "Jamshedpur",
+    "Dhanbad"
+  ],
+  "Karnataka": [
+    "Bengaluru",
+    "Mysore",
+    "Mangalore"
+  ],
+  "Kerala": [
+    "Thiruvananthapuram",
+    "Kochi",
+    "Kozhikode"
+  ],
+  "Madhya Pradesh": [
+    "Bhopal",
+    "Indore",
+    "Jabalpur"
+  ],
+  "Maharashtra": [
+    "Mumbai",
+    "Pune",
+    "Nagpur"
+  ],
+  "Manipur": [
+    "Imphal",
+    "Bishnupur",
+    "Thoubal"
+  ],
+  "Meghalaya": [
+    "Shillong",
+    "Tura",
+    "Nongpoh"
+  ],
+  "Mizoram": [
+    "Aizawl",
+    "Lunglei",
+    "Champhai"
+  ],
+  "Nagaland": [
+    "Kohima",
+    "Dimapur",
+    "Mokokchung"
+  ],
+  "Odisha": [
+    "Bhubaneswar",
+    "Cuttack",
+    "Rourkela"
+  ],
+  "Punjab": [
+    "Chandigarh",
+    "Ludhiana",
+    "Amritsar"
+  ],
+  "Rajasthan": [
+    "Jaipur",
+    "Udaipur",
+    "Jodhpur"
+  ],
+  "Sikkim": [
+    "Gangtok",
+    "Namchi",
+    "Gyalshing"
+  ],
+  "Tamil Nadu": [
+    "Chennai",
+    "Coimbatore",
+    "Madurai"
+  ],
+  "Telangana": [
+    "Hyderabad",
+    "Warangal",
+    "Nizamabad"
+  ],
+  "Tripura": [
+    "Agartala",
+    "Dharmanagar",
+    "Udaipur"
+  ],
+  "Uttar Pradesh": [
+    "Lucknow",
+    "Kanpur",
+    "Varanasi"
+  ],
+  "Uttarakhand": [
+    "Dehradun",
+    "Haridwar",
+    "Nainital"
+  ],
+  "West Bengal": [
+    "Alipurduar",
+    "Arambag",
+    "Ashoknagar Kalyangarh",
+    "Baduria",
+    "Baharampur",
+    "Baidyabati",
+    "Bally",
+    "Balurghat",
+    "Bangaon",
+    "Bankura",
+    "Bansberia",
+    "Baranagar",
+    "Barasat",
+    "Bardhaman",
+    "Barrackpore",
+    "Baruipur",
+    "Basirhat",
+    "Beldanga",
+    "Bhadreswar",
+    "Bhatpara",
+    "Birnagar",
+    "Bishnupur",
+    "Bolpur",
+    "Budge Budge",
+    "Buniadpur",
+    "Chakdaha",
+    "Champdani",
+    "Chandrakona",
+    "Contai",
+    "Cooch Behar",
+    "Darjeeling",
+    "Dhulian",
+    "Dinhata",
+    "Durgapur",
+    "English Bazar",
+    "Gangarampur",
+    "Habra",
+    "Haldia",
+    "Halisahar",
+    "Howrah",
+    "Islampur",
+    "Jalpaiguri",
+    "Jangipur",
+    "Jhargram",
+    "Kalyani",
+    "Kamarhati",
+    "Kanchrapara",
+    "Kandi",
+    "Kharagpur",
+    "Kolkata",
+    "Krishnanagar",
+    "Malda",
+    "Mathabhanga",
+    "Medinipur",
+    "Memari",
+    "Murshidabad",
+    "Nabadwip",
+    "Naihati",
+    "North Dum Dum",
+    "Purulia",
+    "Raiganj",
+    "Rampurhat",
+    "Ranaghat",
+    "Rishra",
+    "Serampore",
+    "Siliguri",
+    "Sonarpur",
+    "South Dum Dum",
+    "Tamluk",
+    "Titagarh"
+  ]
+ 
+}
