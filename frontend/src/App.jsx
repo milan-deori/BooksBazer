@@ -4,13 +4,16 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Sell from './pages/Sell';
+import BookDetails from './pages/BookDetails';
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useState, useEffect } from "react";
+import { Navigate } from "react-router-dom";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
+  
 
   useEffect(() => {
     const status = localStorage.getItem("isLoggedIn");
@@ -31,12 +34,14 @@ function App() {
 />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/login" element={
-          <Login setIsLoggedIn={setIsLoggedIn} setUser={setUser} />
+       <Route path="/login" element={isLoggedIn ? <Navigate to="/" /> : <Login setIsLoggedIn={setIsLoggedIn} setUser={setUser} />} />
 
-        } />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/sell" element={<Sell user={user} />}/>
+        <Route path="/sell" element={isLoggedIn ? <Sell user={user} /> : <Navigate to="/login" />} />
+        <Route path="/book/:id" element={<BookDetails />} />
+        <Route path="*" element={<Navigate to="/" />} />
+
+
       </Routes>
       <ToastContainer position="top-center" autoClose={2000} />
     </BrowserRouter>

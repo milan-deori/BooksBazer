@@ -1,5 +1,5 @@
 // src/components/Header.jsx
-import { Link, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { FaSearch, FaRegHeart, FaRegComment, FaRegBell, FaRegUserCircle } from "react-icons/fa";
 import { useState, useRef, useEffect } from "react";
 import { toast, ToastContainer } from "react-toastify";

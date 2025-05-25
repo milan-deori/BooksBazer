@@ -2,55 +2,58 @@ const express = require('express');
 require("dotenv").config();
 const mongoose = require("mongoose");
 const passport = require("passport");
+const jwt = require('jsonwebtoken');
 const cors = require("cors");
 const session = require("express-session");
-const User = require("./models/user"); // assumes passport-local-mongoose is used
+const authMiddleware = require("./middleware/authMiddleware");
+const User = require("./models/user"); // Passport-local-mongoose assumed
+const Book = require('./models/sell'); 
+const upload = require("./utils/upload"); // Assuming you have a file upload utility  
+const cloudinary = require("./utils/cloudinary"); // Assuming you have a cloudinary utility
+
+
 const app = express();
 const port = 3000;
 
-
-
-// Connect to MongoDB
-async function main() {
-  await mongoose.connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-  });
-}
-main().then(() => console.log('MongoDB connected'))
+// MongoDB connection
+mongoose.connect(process.env.MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+}).then(() => console.log('MongoDB connected'))
   .catch(err => console.error('MongoDB connection error:', err));
 
 
-// Middleware
+// Middlewares connection
+app.use(express.static("public"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// CORS for frontend communication
+// CORS config
 app.use(cors({
   origin: "http://localhost:5173", // your frontend
-  credentials: true
+  credentials: true // Allow sending cookies
 }));
 
-// Session config (store in memory; use MongoStore in production)
+
+// Session config
 app.use(session({
-  secret: "yourSecretKey",
+  secret: "milansecret",
   resave: false,
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    secure: false, // true if using HTTPS
+    secure: false, // Set true if using HTTPS
     maxAge: 1000 * 60 * 60 * 24 // 1 day
   }
 }));
 
-// Passport initialization
+// Passport setup
 app.use(passport.initialize());
 app.use(passport.session());
-
-// Use static serialize/deserialize from passport-local-mongoose
 passport.use(User.createStrategy());
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
+
+
 
 
 // Routes
@@ -58,7 +61,7 @@ app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
-// Signup
+// Signup Route
 app.post("/signup", async (req, res) => {
   const { email, name, number, password } = req.body;
   try {
@@ -77,8 +80,7 @@ app.post("/signup", async (req, res) => {
   }
 });
 
-
-// Login
+// Login Route
 app.post("/login", (req, res, next) => {
   passport.authenticate("local", (err, user, info) => {
     if (err) return next(err);
@@ -87,9 +89,16 @@ app.post("/login", (req, res, next) => {
     req.login(user, (err) => {
       if (err) return next(err);
 
-      // Send basic user info to frontend
+      // Generate JWT token after successful login
+      const token = jwt.sign(
+        { id: user._id, name: user.name, email: user.email },
+        process.env.JWT_SECRET, // Use your secret here
+        { expiresIn: '24h' } // Token expiration time (optional)
+      );
+
       return res.status(200).json({
         message: "Login successful",
+        token, // Send the token back to the frontend
         user: {
           id: user._id,
           name: user.name,
@@ -101,16 +110,113 @@ app.post("/login", (req, res, next) => {
 });
 
 
-// Logout
+
+// Protected route to create book
+app.post("/books", authMiddleware, upload.array('images', 3), async (req, res) => {
+  const { title, description, price, phone, state, city, pincode, latitude, longitude } = req.body;
+
+  // Validate required fields (latitude and longitude are optional; add if required)
+  if (!title || !description || !price || !phone || !state || !city || !pincode) {
+    return res.status(400).json({ error: "All fields are required" });
+  }
+
+  // Validate image upload
+  if (!req.files || req.files.length === 0) {
+    return res.status(400).json({ error: "At least one image is required" });
+  }
+
+  if (req.files.length > 3) {
+    return res.status(400).json({ error: "You can only upload up to 3 images" });
+  }
+
+  // Optional: Validate latitude and longitude (if provided)
+  if (latitude && (isNaN(latitude) || latitude < -90 || latitude > 90)) {
+    return res.status(400).json({ error: "Invalid latitude value" });
+  }
+  if (longitude && (isNaN(longitude) || longitude < -180 || longitude > 180)) {
+    return res.status(400).json({ error: "Invalid longitude value" });
+  }
+
+  try {
+    const imageUrls = req.files.map(file => file.path); // Map image paths to an array
+
+    const newBook = new Book({
+      title,
+      description,
+      price,
+      phone,
+      state,
+      city,
+      pincode,
+      images: imageUrls,
+      user: req.user.id,
+      dateAdded: Date.now(),
+      // Save latitude and longitude as numbers, convert from strings if necessary
+      latitude: latitude ? parseFloat(latitude) : undefined,
+      longitude: longitude ? parseFloat(longitude) : undefined,
+    });
+
+    await newBook.save();
+    res.status(201).json(newBook);
+  } catch (error) {
+    console.error("Error saving book:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+
+
+
+
+
+
+
+app.get("/api/books", async (req, res) => {
+  try {
+    // Fetch all books and populate the user details (name, email)
+    const books = await Book.find()
+      .populate("user", "name email")  // Populate user fields
+      .exec();
+
+    // If there are no books, send a proper message
+    if (!books || books.length === 0) {
+      return res.status(404).json({ message: "No books found" });
+    }
+
+    // Send the books as a JSON response
+    res.status(200).json(books);
+
+  } catch (error) {
+    console.error("Error fetching books:", error);
+    res.status(500).json({ error: "Server error, unable to fetch books" });
+  }
+});
+
+
+app.get("/api/books/:id", async (req, res) => {
+  try {
+    const book = await Book.findById(req.params.id).populate("user",);
+    res.status(200).json(book);
+  } catch (err) {
+    res.status(500).json({ error: "Book not found" });
+  }
+});
+
+
+
+
+// Logout Route
 app.post("/logout", (req, res) => {
-  req.logout(err => {
-    if (err) return res.status(500).json({ message: "Logout failed" });
-    res.json({ message: "Logged out successfully" });
+  req.logout((err) => {
+    if (err) {
+      return res.status(500).json({ message: "Logout failed" });
+    }
+    res.status(200).json({ message: "Logout successful" });
   });
-});
-
-
-// Start server
+});           
 app.listen(port, () => {
-  console.log(`app listening at http://localhost:${port}`);
+  console.log(`Server running at http://localhost:${port}`);
 });
+
+
+// Export the app for testing

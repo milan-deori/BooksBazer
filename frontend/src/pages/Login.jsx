@@ -23,19 +23,20 @@ const Login = ({ setIsLoggedIn, setUser }) => {
     try {
       const response = await axios.post("http://localhost:3000/login", form);
 
-      
+
 
       // ✅ If login successful, update state & localStorage
       localStorage.setItem("isLoggedIn", true);
-      localStorage.setItem("token", response.data.token); // store JWT token
-      localStorage.setItem("userId", response.data.user._id); // store user ID
-      localStorage.setItem("user", JSON.stringify(response.data.user)); // store name, email etc.
+
+      localStorage.setItem("token", response.data.token); // ✅ Storing JWT
+      localStorage.setItem("userId", response.data.user._id); // ✅ Storing user ID
+      localStorage.setItem("user", JSON.stringify(response.data.user)); // // store name, email etc.
       setIsLoggedIn(true);
       setUser(response.data.user);
       toast.success("Login successful!", { autoClose: 2000 });
       setTimeout(() => navigate("/"), 1000); // Redirect to home after 1 second
 
-      
+
     } catch (error) {
       if (error.response && error.response.status === 400) {
         toast.error("Please enter all fields");
