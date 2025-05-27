@@ -9,7 +9,7 @@ const authMiddleware = require("./middleware/authMiddleware");
 const User = require("./models/user"); // Passport-local-mongoose assumed
 const Book = require('./models/sell'); 
 const upload = require("./utils/upload"); // Assuming you have a file upload utility  
-const cloudinary = require("./utils/cloudinary"); // Assuming you have a cloudinary utility
+const { isAuthor } = require("./middleware/isAuthor"); // Assuming you have an isAuthor middleware
 
 
 const app = express();
@@ -111,7 +111,8 @@ app.post("/login", (req, res, next) => {
 
 
 
-// Protected route to create book
+// Protected route 
+
 app.post("/books", authMiddleware, upload.array('images', 3), async (req, res) => {
   const { title, description, price, phone, state, city, pincode, latitude, longitude } = req.body;
 
@@ -166,10 +167,7 @@ app.post("/books", authMiddleware, upload.array('images', 3), async (req, res) =
 
 
 
-
-
-
-
+// Get all books with user details
 
 app.get("/api/books", async (req, res) => {
   try {
@@ -193,12 +191,65 @@ app.get("/api/books", async (req, res) => {
 });
 
 
+// Get a single book by ID with user details
 app.get("/api/books/:id", async (req, res) => {
   try {
     const book = await Book.findById(req.params.id).populate("user",);
     res.status(200).json(book);
   } catch (err) {
     res.status(500).json({ error: "Book not found" });
+  }
+});
+
+
+// DELETE route
+app.delete('/api/books/:id',  isAuthor, async (req, res) => {
+  const { id } = req.params;
+  await Book.findByIdAndDelete(id);
+  res.status(200).json({ message: 'Post deleted successfully' });
+});
+
+
+
+
+// Update route
+app.put('/api/books/:id', authMiddleware, upload.array('images', 3), async (req, res) => {
+  const { id } = req.params;
+  const { title, description, price, phone, state, city, pincode,} = req.body;
+
+  // Validate required fields
+  if (!title || !description || !price || !phone || !state || !city || !pincode) {
+    return res.status(400).json({ error: "All fields are required" });
+  }
+
+  try {
+    const book = await Book.findById(id);
+    if (!book) {
+      return res.status(404).json({ error: "Book not found" });
+    }
+
+    // Update book details
+    book.title = title;
+    book.description = description;
+    book.price = price;
+    book.phone = phone;
+    book.state = state;
+    book.city = city;
+    book.pincode = pincode;
+
+    // Handle image uploads
+    if (req.files && req.files.length > 0) {
+      const imageUrls = req.files.map(file => file.path);
+      book.images = imageUrls; // Update images with new uploads
+    }
+
+
+
+    await book.save();
+    res.status(200).json(book);
+  } catch (error) {
+    console.error("Error updating book:", error);
+    res.status(500).json({ error: "Server error" });
   }
 });
 

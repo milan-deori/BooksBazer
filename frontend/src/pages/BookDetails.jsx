@@ -1,12 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { FaShareAlt, FaHeart } from "react-icons/fa";
+import { GoShareAndroid } from "react-icons/go";
 
 
-const BookDetails = () => {
+const BookDetails = ({ user }) => {
+    //
     const { id } = useParams();
     const [book, setBook] = useState(null);
     const [currentImg, setCurrentImg] = useState(0);
+
+
 
     useEffect(() => {
         const fetchBook = async () => {
@@ -32,6 +39,47 @@ const BookDetails = () => {
     const handleNext = () => {
         setCurrentImg((prev) => (prev === book.images.length - 1 ? 0 : prev + 1));
     };
+
+
+
+
+    const handleDelete = async () => {
+        if (window.confirm('Are you sure you want to delete this post?')) {
+            try {
+                const response = await fetch(`http://localhost:3000/api/books/${id}`, {
+                    method: "DELETE",
+                    credentials: "include",
+                });
+
+                if (response.ok) {
+                    alert('Post deleted successfully');
+                    window.location.href = '/'; // Redirect to home or another page
+                } else {
+                    const errorData = await response.json();
+                    alert(`Error deleting post: ${errorData.message}`);
+                }
+            } catch (err) {
+                console.error('Error deleting post:', err);
+                alert('Failed to delete post. Please try again later.');
+            }
+        }
+
+    };
+
+
+    const handleShare = () => {
+        const url = window.location.href;
+        const text = `Check out this book: ₹${book.price} - ${book.title} - ${url}`;
+        const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+        window.open(whatsappUrl, "_blank");
+    };
+
+
+
+
+
+
+
 
 
     return (
@@ -92,26 +140,73 @@ const BookDetails = () => {
 
                 {/* Right Side Info */}
                 <div className="space-y-4">
-                    <div className="bg-white p-4 rounded shadow space-y-2">
+                    <div className="bg-white p-4 rounded shadow space-y-2 relative">
+                        {/* Top Right Icons */}
+                        <div className="absolute top-3 right-3 flex space-x-3 text-gray-600 text-lg">
+                            <button onClick={handleShare}>
+                                <GoShareAndroid  className="text-2xl font-bold hover:bg-cyan-200 rounded-3xl" />
+                            </button>
+                            <button>
+                                <FaHeart className="text-2xl font-bold hover:text-red-600 cursor-pointer" />
+                            </button>
+                        </div>
+
+                        {/* Book Info */}
                         <h2 className="text-2xl font-bold text-black">₹ {book.price}</h2>
                         <p className="text-md text-gray-700">{book.title}</p>
-                        <p className="text-sm text-gray-500">{book.city}, {book.state} </p>
-                        <p className="text-xs text-gray-400">Posted on {new Date(book.createdAt).toLocaleDateString()}</p>
+                        <p className="text-sm text-gray-500">
+                            {book.city}, {book.state}
+                        </p>
+                        <p className="text-xs text-gray-400">
+                            Posted on {new Date(book.createdAt).toLocaleDateString()}
+                        </p>
                     </div>
 
                     <div className="bg-white p-4 rounded shadow">
-                        <p className="font-semibold">Posted by {(book.user.name || 'Unknown').toUpperCase()}</p>
-                        <p className="text-sm text-gray-500">Member since Jun 2024</p>
-                        <button className="mt-3 w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition">
-                            Chat with seller
-                        </button>
+                        <p className="font-semibold">
+                            Posted by {(book.user.name || 'Unknown').toUpperCase()}
+                        </p>
+                        <p className="text-sm text-gray-500">Member since Jun 2025</p>
+
+                        {/* Check if current logged-in user is the owner */}
+                        {user && book.user._id === user.id ? (
+                            <>
+                                {/* Owner Options */}
+                                <div className="mt-3 flex flex-col gap-2">
+
+                                    <div className="flex gap-2">
+                                        <Link to={`/edit/${id}`} className="flex-1">
+                                            <button className="w-full border border-blue-500 text-blue-500 py-2 rounded hover:bg-blue-50 transition">
+                                                Edit
+                                            </button>
+                                        </Link>
+                                        <button
+                                            onClick={handleDelete}
+                                            className="flex-1 border border-red-500 text-red-500 py-2 rounded hover:bg-red-50 transition"
+                                        >
+                                            Remove
+                                        </button>
+                                    </div>
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                {/* Non-owner option */}
+                                <button className="mt-3 w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition">
+                                    Chat with seller
+                                </button>
+                            </>
+                        )}
                     </div>
+
 
                     <div className="bg-white p-4 rounded shadow">
                         <h3 className="font-semibold mb-1">Posted in</h3>
                         <p className="text-sm text-gray-600 mb-2">{book.city}, {book.state}, {book.pincode}</p>
                         <iframe
-                            src={`https://www.google.com/maps?q=${book.latitude || 18.548},${book.longitude || 73.935}&z=15&output=embed`}
+                            src={`https://www.google.com/maps?q=${book.city || 'Pune'}+${book.pincode || '411001'}&z=15&output=embed`}
+                            frameBorder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                             width="100%"
                             height="200"
                             className="rounded"
