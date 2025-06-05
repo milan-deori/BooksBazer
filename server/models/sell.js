@@ -5,6 +5,16 @@ const sellSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  author:{
+    type:String,
+    require:true
+  },
+   category:{
+    type:String,
+    require:true
+   },
+
+
   description: {
     type: String,
     required: true
@@ -46,14 +56,22 @@ const sellSchema = new mongoose.Schema({
       message: 'You can only upload up to 3 images.',
     }
   },
-  latitude: {
-    type: Number,
-    required: false
+  isSold: {
+    type: Boolean,
+    default: false
   },
-  longitude: {
+  likes: {
     type: Number,
-    required: false
+    default: 0
   },
+  likedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  
+    views: {
+    type: Number,
+    default: 0
+  },
+  viewedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+
   dateAdded: {
     type: Date,
     default: Date.now,

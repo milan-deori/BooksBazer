@@ -3,16 +3,32 @@ import { useParams } from 'react-router-dom';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { FaShareAlt, FaHeart } from "react-icons/fa";
+import { FaHeart } from "react-icons/fa";
 import { GoShareAndroid } from "react-icons/go";
+import { FaWhatsapp } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import axios from 'axios';
 
 
-const BookDetails = ({ user }) => {
+const BookDetails = ({ user, isLoggedIn,  setWishlist, }) => {
+
+   
+
+
     //
     const { id } = useParams();
     const [book, setBook] = useState(null);
     const [currentImg, setCurrentImg] = useState(0);
+    const [bookmarked, setBookmarked] = useState(false);
 
+
+ const navigate = useNavigate();
+
+
+ useEffect(() => {
+  const storedWishlist = JSON.parse(localStorage.getItem("wishlist")) || [];
+  setBookmarked(storedWishlist.includes(id));
+}, [id]);
 
 
     useEffect(() => {
@@ -30,7 +46,29 @@ const BookDetails = ({ user }) => {
         fetchBook();
     }, [id]);
 
+
+
+useEffect(() => {
+  if (book && user && user.id) {
+    fetch(`http://localhost:3000/api/books/${book._id}/view`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ userId: user.id })
+    });
+  }
+}, [book, user]);
+
+
+
+
+
+
+
+
     if (!book) return <div className="p-6">Loading...</div>;
+
 
     const handlePrev = () => {
         setCurrentImg((prev) => (prev === 0 ? book.images.length - 1 : prev - 1));
@@ -39,6 +77,11 @@ const BookDetails = ({ user }) => {
     const handleNext = () => {
         setCurrentImg((prev) => (prev === book.images.length - 1 ? 0 : prev + 1));
     };
+
+
+    //for booklist 
+  
+
 
 
 
@@ -74,6 +117,64 @@ const BookDetails = ({ user }) => {
         window.open(whatsappUrl, "_blank");
     };
 
+
+    const handlewpShare = () => {
+
+
+        if (!isLoggedIn) {
+            toast.warning("You have to login first!", {
+                position: "top-center",
+                autoClose: 2000,
+            });
+            setTimeout(() => {
+                navigate("/login");
+            }, 1000); // Wait 2 seconds before redirect
+            return;
+        }
+        const url = window.location.href;
+        const text = `hi, I am interested in this book:- ${url}`;
+        const phone = book.phone;
+
+        const whatsappUrl = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(text)}`;
+        window.open(whatsappUrl, "_blank");
+    };
+ 
+
+
+   
+
+ 
+
+const handleBookmark = async () => {
+  if (!isLoggedIn) {
+    toast.warning("You have to login first!");
+    setTimeout(() => navigate("/login"), 1000);
+    return;
+  }
+
+  try {
+    if (bookmarked) {
+      await axios.post("http://localhost:3000/api/wishlist/add", {
+        userId: user.id,
+        bookId: id,
+      });
+      setWishlist((prev) => prev.filter((item) => item !== id));
+      toast.success("Added to wishlist");
+    } else {
+      await axios.post("http://localhost:3000/api/wishlist/remove", {
+        userId: user.id,
+        bookId: id,
+      });
+      setWishlist((prev) => [...prev, id]);
+      toast.success("Removed from wishlist");
+    }
+
+    setBookmarked(!bookmarked);
+  } catch (err) {
+    console.error("Error updating wishlist", err);
+    toast.error("Failed to update wishlist");
+  }
+};
 
 
 
@@ -144,10 +245,13 @@ const BookDetails = ({ user }) => {
                         {/* Top Right Icons */}
                         <div className="absolute top-3 right-3 flex space-x-3 text-gray-600 text-lg">
                             <button onClick={handleShare}>
-                                <GoShareAndroid  className="text-2xl font-bold hover:bg-cyan-200 rounded-3xl" />
+                                <GoShareAndroid className="text-2xl font-bold hover:bg-cyan-200 rounded-3xl" />
                             </button>
-                            <button>
-                                <FaHeart className="text-2xl font-bold hover:text-red-600 cursor-pointer" />
+                            <button onClick={handleBookmark}>
+                                <FaHeart
+                                    className={`text-2xl font-bold cursor-pointer transition-colors duration-300 ${!bookmarked ? "text-red-600" : "text-gray-400 hover:text-red-600"
+                                        }`}
+                                />
                             </button>
                         </div>
 
@@ -192,9 +296,17 @@ const BookDetails = ({ user }) => {
                         ) : (
                             <>
                                 {/* Non-owner option */}
-                                <button className="mt-3 w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition">
-                                    Chat with seller
+
+                                <button
+                                    onClick={handlewpShare}
+                                    className="mt-3 w-full flex items-center justify-center gap-2 bg-green-500 text-white py-2 px-4 rounded-lg shadow hover:bg-green-600 transition duration-300 ease-in-out"
+                                >
+                                    <FaWhatsapp className="text-xl" />
+                                    <span className="font-medium">Chat with Seller</span>
                                 </button>
+
+
+
                             </>
                         )}
                     </div>
