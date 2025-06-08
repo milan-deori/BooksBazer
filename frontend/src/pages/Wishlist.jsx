@@ -50,8 +50,23 @@ const Wishlist = ({ user }) => {
 
                   {/* Info */}
                   <div className="flex flex-col justify-between mt-3 px-2 flex-grow text-sm text-gray-700 space-y-2">
-                    <h2 className="text-base font-extrabold text-gray-900">₹ {book.price}</h2>
+                    <div className="flex items-center justify-between">
+                      {book.category?.toLowerCase() === "donate" ? (
+                        <h2 className="text-base font-extrabold text-gray-700">
+                          ₹ 00
+                        </h2>
+                      ) : (
+                        <h2 className="text-base font-semibold text-gray-900">
+                          ₹ {book.price}
+                        </h2>
+                      )}
 
+                      {book.category.toLowerCase() === "donate" && (
+                        <span className="bg-gradient-to-r from-green-400 to-blue-500 text-white text-[11px] md:text-xs px-2 md:px-3 py-[2px] md:py-1 rounded-full font-medium shadow-md whitespace-nowrap">
+                          For Donate
+                        </span>
+                      )}
+                    </div>
                     <p className="font-medium truncate">{book.title}</p>
 
                     <p className="font-semibold text-indigo-900 truncate">
