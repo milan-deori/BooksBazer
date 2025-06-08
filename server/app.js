@@ -15,7 +15,7 @@ const app = express();
 // ---------- MIDDLEWARE ----------
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
+app.use(cors({ origin: 'https://booksfindr.somestudys.in', credentials: true }));
 
 app.use(session({
   secret: "milansecret",
