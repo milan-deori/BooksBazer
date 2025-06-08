@@ -21,6 +21,7 @@ import NotePage from "./pages/catagories/NotePage";
 import OthersPage from "./pages/catagories/OthersPage";
 import AuthSuccess from "./pages/AuthSuccess";
 import SearchResults from "./components/SearchResults"
+import Donate from "./pages/catagories/Donate";
 
 
 
@@ -92,6 +93,7 @@ function App() {
         <Route path="/books/ebook" element={<EBook setWishlist={setWishlist} user={user}/>} />
         <Route path="/books/notes" element={<NotePage setWishlist={setWishlist} user={user} />} />
         <Route path="/books/others" element={<OthersPage setWishlist={setWishlist} user={user}/>} />
+        <Route path="/books/donate" element={<Donate setWishlist={setWishlist} user={user} /> }/>
         {/* Redirect any unknown routes to home */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>

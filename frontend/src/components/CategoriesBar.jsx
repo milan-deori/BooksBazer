@@ -69,6 +69,17 @@ const CategoriesBar = () => {
         >
           Others
         </Link>
+       <Link
+  to="/books/donate"
+  className={`px-3 py-1 rounded-full border 
+    ${isActive("/books/donate") === "text-blue-600 bg-blue-100 border-blue-500"
+      ? "text-white bg-gradient-to-r from-green-400 to-blue-500 border-none shadow-md"
+      : "text-white bg-gradient-to-r from-purple-400 to-pink-500 border-none hover:shadow-lg"} 
+    font-semibold transition duration-300`}
+> Donated Books
+</Link>
+
+
       </div>
     </div>
   );

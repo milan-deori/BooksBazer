@@ -22,7 +22,7 @@ const Sell = ({ user }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
-  const categories = ["Study Book", "Fiction", "Biography", "Competitive Exam", "Regional & Spiritual",  "Notes", "Others"];
+  const categories = ["Study Book", "Fiction", "Biography", "Competitive Exam", "Regional & Spiritual",  "Notes", "Donate", "Others"];
 
   
    
