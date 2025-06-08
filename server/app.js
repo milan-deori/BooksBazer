@@ -13,9 +13,25 @@ dotenv.config();
 const app = express();
 
 // ---------- MIDDLEWARE ----------
+allowedOrigins = [
+    "http://localhost",
+    'http://localhost:5173',
+    'https://booksfindr.somestudys.in',
+    'https://booksfindr.somestudys.in/'           
+]
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors({ origin: 'https://booksfindr.somestudys.in', credentials: true }));
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+}));
 
 app.use(session({
   secret: "milansecret",
