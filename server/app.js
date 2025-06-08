@@ -87,7 +87,7 @@ app.get('/auth/google/callback',
     }, process.env.JWT_SECRET, { expiresIn: '24h' });
 
     // Redirect to frontend with token
-    res.redirect(`http://localhost:5173/auth-success?token=${token}`);
+    res.redirect(`https://booksfindr.somestudys.in/auth-success?token=${token}`);
   }
 );
 
