@@ -1,64 +1,72 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
-// assuming you use a reusable card
 
-const Wishlist = ({ user}) => {
+const Wishlist = ({ user }) => {
   const [wishlistBooks, setWishlistBooks] = useState([]);
- 
 
-  /*useEffect(() => {
-    const fetchWishlistBooks = async () => {
+  useEffect(() => {
+    const fetchWishlist = async () => {
       try {
-        const { data } = await axios.post("http://localhost:3000/api/wishlist", { ids: wishlist });
-        setWishlistBooks(data); // Ensure your backend sends an array
-      } catch (error) {
-        console.error("Error fetching wishlist books:", error);
-        setWishlistBooks([]); // fallback to empty array on error
+        const res = await axios.get(`http://localhost:3000/api/wishlist/${user.id}`);
+        setWishlistBooks(res.data || []);
+      } catch (err) {
+        console.error("Failed to fetch wishlist:", err);
+        setWishlistBooks([]);
       }
     };
 
-    if (wishlist && wishlist.length > 0) {
-      fetchWishlistBooks();
-    } else {
-      setWishlistBooks([]); // explicitly set empty array if no wishlist
-    }
-  }, [wishlist]);*/
-  // Wishlist.jsx
-useEffect(() => {
-  const fetchWishlist = async () => {
-    try {
-      const res = await axios.get(`http://localhost:3000/api/wishlist/${user.id}`);
-      setWishlistBooks(res.data); // fixed the typo here
-    } catch (err) {
-      console.error("Failed to fetch wishlist:", err);
-      setWishlistBooks([]); // fallback
-    }
+    if (user?.id) fetchWishlist();
+  }, [user]);
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString();
   };
 
-  if (user?.id) fetchWishlist();
-}, [user]);
-
-
-
   return (
-    <div className="p-6">
-      <h2 className="text-2xl font-bold mb-4">Your Wishlist</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="bg-[#f1f2f4] min-h-screen py-6 px-4">
+      <div className="max-w-screen-2xl mx-auto">
+        <h2 className="text-2xl font-semibold text-gray-800 mb-4">Your Wishlist</h2>
+        <hr className="border-gray-600 mb-6" />
+
         {wishlistBooks.length === 0 ? (
-          <p className="text-gray-600">No books in your wishlist.</p>
+          <div className="text-center text-gray-500 py-20">
+            <p>No books in your wishlist yet.</p>
+          </div>
         ) : (
-          wishlistBooks.map((book) => (
-            <Link to={`/book/${book._id}`} key={book._id}>
-              <div key={book._id} className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition duration-200">
-              <img src={book.images[0]} alt={book.title} className="w-full h-48 object-cover rounded-t-md mb-4" />
-              <h3 className="text-lg font-semibold text-gray-800">{book.title}</h3>
-              <p className="text-gray-600">₹ {book.price}</p>
-              <p className="text-sm text-gray-500 mt-2">{new Date(book.createdAt).toLocaleDateString()}</p>
-            </div>
-            </Link>
-            
-          ))
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {wishlistBooks.map((book) => (
+              <Link to={`/book/${book._id}`} key={book._id}>
+                <div className="bg-white rounded-md border border-gray-300 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col p-3 hover:scale-[1.02]">
+                  {/* Image */}
+                  <div className="w-full h-44 bg-gray-200 rounded-md overflow-hidden">
+                    <img
+                      src={book.images[0]}
+                      alt={book.title}
+                      className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                    />
+                  </div>
+
+                  {/* Info */}
+                  <div className="flex flex-col justify-between mt-3 px-2 flex-grow text-sm text-gray-700 space-y-2">
+                    <h2 className="text-base font-extrabold text-gray-900">₹ {book.price}</h2>
+
+                    <p className="font-medium truncate">{book.title}</p>
+
+                    <p className="font-semibold text-indigo-900 truncate">
+                      Author: {book.author || "Unknown"}
+                    </p>
+
+                    <div className="flex justify-between items-center text-xs text-gray-500 pt-2 border-t border-gray-200 mt-auto">
+                      <span>{book.city || "City"}, {book.state || "State"}</span>
+                      <span>{formatDate(book.createdAt)}</span>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
         )}
       </div>
     </div>
@@ -66,6 +74,8 @@ useEffect(() => {
 };
 
 export default Wishlist;
+
+
 
 // Wishlist.jsx
 // Wishlist.jsx 

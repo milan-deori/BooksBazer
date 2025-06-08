@@ -12,15 +12,15 @@ import "react-toastify/dist/ReactToastify.css";
 import { useState, useEffect } from "react";
 import Dashboard from "./components/Dashboard";
 import StudyPage from "./pages/catagories/Studypage";
-import StoryPage from "./pages/catagories/StoryPage";
+import Fiction from "./pages/catagories/Fiction";
 import BioPage from "./pages/catagories/BioPage";
-import ComicPage from "./pages/catagories/ComicPage";
 import Regional from "./pages/catagories/Regional";
 import Competitive from "./pages/catagories/Competitive";
-import SelfPage from "./pages/catagories/SelfPage";
+import EBook from "./pages/catagories/EBook";
 import NotePage from "./pages/catagories/NotePage";
 import OthersPage from "./pages/catagories/OthersPage";
 import AuthSuccess from "./pages/AuthSuccess";
+import SearchResults from "./components/SearchResults"
 
 
 
@@ -28,6 +28,8 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
   const [wishlist, setWishlist] = useState([]);
+  
+   
 
 
   // Check login status and user data on initial load
@@ -69,12 +71,7 @@ function App() {
 
   return (
     <BrowserRouter>
-      <Header
-        isLoggedIn={isLoggedIn}
-        setIsLoggedIn={setIsLoggedIn}
-        user={user}
-        setUser={setUser}
-      />
+      <Header isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} user={user} setUser={setUser} />
       <Routes>
         <Route path="/" element={<Home setWishlist={setWishlist} user={user}/>} />
         <Route path="/login" element={isLoggedIn ? <Navigate to="/" /> : <Login setIsLoggedIn={setIsLoggedIn} setUser={setUser} />} />
@@ -85,22 +82,19 @@ function App() {
         <Route path="/edit/:id" element={<EditPost user={user} />} />
         <Route path="/wishlist" element={<Wishlist user={user}  />} />
         <Route path="/dashboard" element={isLoggedIn ? <Dashboard user={user} /> : <Navigate to="/login" />} />
-        <Route path="/books/study" element={<StudyPage />} />
-        <Route path="/books/story" element={<StoryPage />} />
-        <Route path="/books/biography" element={<BioPage />} />
-        <Route path="/books/comics" element={<ComicPage />} />
-        <Route path="/books/regional" element={<Regional />} />
-        <Route path="/books/competitive" element={<Competitive />} />
-        <Route path="/books/self-help" element={<SelfPage />} />
-        <Route path="/books/notes" element={<NotePage />} />
-        <Route path="/books/others" element={<OthersPage />} />
-
-
-
+        <Route path="/search-results" element={<SearchResults setWishlist={setWishlist} user={user} />} />
+        {/* Category Routes */}
+        <Route path="/books/study" element={<StudyPage setWishlist={setWishlist} user={user} />} />
+        <Route path="/books/fiction" element={<Fiction setWishlist={setWishlist} user={user} />} />
+        <Route path="/books/biography" element={<BioPage  setWishlist={setWishlist} user={user}/>} />
+        <Route path="/books/regional" element={<Regional setWishlist={setWishlist} user={user}/>} />
+        <Route path="/books/competitive" element={<Competitive setWishlist={setWishlist} user={user}/>} />
+        <Route path="/books/ebook" element={<EBook setWishlist={setWishlist} user={user}/>} />
+        <Route path="/books/notes" element={<NotePage setWishlist={setWishlist} user={user} />} />
+        <Route path="/books/others" element={<OthersPage setWishlist={setWishlist} user={user}/>} />
         {/* Redirect any unknown routes to home */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
-     
     </BrowserRouter>
   );
 }

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FaEye, FaHeart, FaCalendarAlt, FaUserCheck } from "react-icons/fa";
+import { FaEye, FaHeart, FaCalendarAlt } from "react-icons/fa";
 import userImage from "./user.png";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -8,11 +8,13 @@ import { MdVerified } from "react-icons/md";
 const Dashboard = ({ user }) => {
   const [books, setBooks] = useState([]);
   const [fullUser, setFullUser] = useState(null);
-  const[sold, setSold] = useState(false);
+  const [sold, setSold] = useState(false);
 
   const handleMarkasSold = async (bookId) => {
-      const confirm = window.confirm("⚠️ Once you mark this book as sold, it cannot be undone. Do you want to continue?");
-  if (!confirm) return;
+    const confirm = window.confirm(
+      "⚠️ Once you mark this book as sold, it cannot be undone. Do you want to continue?"
+    );
+    if (!confirm) return;
     try {
       const res = await fetch(`http://localhost:3000/api/books/${bookId}/sold`, {
         method: "PUT",
@@ -20,7 +22,6 @@ const Dashboard = ({ user }) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ sold: true }),
-
       });
       if (res.ok) {
         setSold(true);
@@ -37,14 +38,15 @@ const Dashboard = ({ user }) => {
     }
   };
 
-
   useEffect(() => {
     const fetchBooks = async () => {
       try {
         const res = await fetch("http://localhost:3000/api/books");
         const data = await res.json();
         if (res.ok) {
-          const userBooks = data.filter((book) => book.user && book.user._id === user.id);
+          const userBooks = data.filter(
+            (book) => book.user && book.user._id === user.id
+          );
           setBooks(userBooks);
         }
       } catch (err) {
@@ -76,21 +78,16 @@ const Dashboard = ({ user }) => {
     return date.toLocaleDateString();
   };
 
-
- const totalLikes = books.reduce((sum, book) => sum + (book.likes || 0), 0);
+  const totalLikes = books.reduce((sum, book) => sum + (book.likes || 0), 0);
   const totalViews = books.reduce((sum, book) => sum + (book.views || 0), 0);
   const totalSold = books.filter((book) => book.isSold || book.sold).length;
-  
-   
-
 
   return (
     <div className="max-w-7xl mx-auto mt-10 px-4 sm:px-6 lg:px-8 py-8">
-      {/* Main Flex Container */}
+      {/* Main Flex Container: stacked on small, horizontal on lg */}
       <div className="flex flex-col lg:flex-row gap-6 justify-center items-stretch">
         {/* Left: Profile */}
-        {/* Left: Profile */}
-        <div className="lg:w-1/4 w-full">
+        <div className="w-full lg:w-1/4">
           <div className="bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-500 p-6 rounded-xl shadow-md text-center h-full flex flex-col justify-between text-white">
             <div>
               {/* Profile Picture */}
@@ -101,7 +98,7 @@ const Dashboard = ({ user }) => {
               />
 
               {/* User Name */}
-              <h2 className="text-xl font-semibold tracking-wide mb-1">
+              <h2 className="text-xl font-semibold tracking-wide mb-1 truncate">
                 {user.name.toUpperCase()}
               </h2>
 
@@ -124,23 +121,20 @@ const Dashboard = ({ user }) => {
               {/* Verified User */}
               <div className="text-sm mt-2 flex items-center justify-center gap-2 text-emerald-300 font-semibold">
                 <MdVerified className="text-emerald-400 text-base" />
-                <span>Verified User </span>
+                <span>Verified User</span>
               </div>
             </div>
 
             {/* Edit Button */}
-            <button className="mt-6 bg-white text-indigo-700 text-sm py-2 px-4 rounded-full hover:bg-gray-100 transition">
+            <button className="mt-6 bg-white text-indigo-700 text-sm py-2 px-4 rounded-full hover:bg-gray-100 transition w-full">
               Edit Profile
             </button>
           </div>
         </div>
 
-
-
-
         {/* Right: Stats Section */}
-        <div className="lg:w-3/5 w-full lg:h-auto flex flex-col justify-between">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 h-full">
+        <div className="w-full lg:w-3/5 flex flex-col justify-between">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 h-full">
             <div className="bg-indigo-500 text-white p-6 rounded-lg shadow-md">
               <p className="text-sm text-center">Books Posted</p>
               <p className="text-2xl font-bold text-center">{books.length}</p>
@@ -171,9 +165,11 @@ const Dashboard = ({ user }) => {
         </h2>
 
         {books.length === 0 ? (
-          <p className="text-gray-500 text-center italic">You haven't posted any ads yet.</p>
+          <p className="text-gray-500 text-center italic">
+            You haven't posted any ads yet.
+          </p>
         ) : (
-          <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {books.map((book) => (
               <motion.div
                 whileHover={{ scale: 1.015 }}
@@ -185,7 +181,12 @@ const Dashboard = ({ user }) => {
                   <div className="text-center col-span-1 border-r px-2 text-gray-600">
                     <p className="font-semibold text-xs text-gray-800">Posted</p>
                     <p className="text-sm">{formatDate(book.createdAt)}</p>
-                    <p className="text-xs">{new Date(book.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
+                    <p className="text-xs">
+                      {new Date(book.createdAt).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </p>
                   </div>
 
                   {/* Book Info */}
@@ -199,24 +200,27 @@ const Dashboard = ({ user }) => {
                         alt={book.title}
                         className="w-16 h-20 object-cover rounded-lg border border-gray-200"
                       />
-                      <div>
-                        <h3 className="font-semibold text-gray-800 truncate">{book.title}</h3>
-                        <p className="text-indigo-600 font-bold text-sm">₹ {book.price}</p>
+                      <div className="overflow-hidden">
+                        <h3 className="font-semibold text-gray-800 truncate">
+                          {book.title}
+                        </h3>
+                        <p className="text-indigo-600 font-bold text-sm">
+                          ₹ {book.price}
+                        </p>
                       </div>
                     </div>
                   </Link>
 
                   {/* Status with Button */}
                   <div className="text-center col-span-1 border-r px-1 flex flex-col items-center justify-center space-y-2">
-                    {book.isSold || book.sold?(
+                    {book.isSold || book.sold ? (
                       <span className="text-xs px-3 py-1 rounded-full text-white bg-red-600 tracking-wide">
                         SOLD
                       </span>
                     ) : (
                       <button
                         onClick={() => handleMarkasSold(book._id)}
-                        className=" px-3 py-1 bg-blue-500 hover:bg-blue-700 text-white text-xs  rounded-full tracking-wide transition"
-                       
+                        className="px-3 py-1 bg-blue-500 hover:bg-blue-700 text-white text-xs rounded-full tracking-wide transition"
                       >
                         Mark as Sold
                       </button>
@@ -226,11 +230,12 @@ const Dashboard = ({ user }) => {
                   {/* Static Status Description */}
                   <div className="col-span-1 px-3 text-sm text-gray-600">
                     <p className="mb-1 font-medium text-gray-700">Status</p>
-                    {book.isSold || book.sold?(<p className="text-xs text-red-600 font-semibold">Inactive</p>):(<p className="text-xs text-green-600 font-semibold">Active</p>)
-                    }
-                    
+                    {book.isSold || book.sold ? (
+                      <p className="text-xs text-red-600 font-semibold">Inactive</p>
+                    ) : (
+                      <p className="text-xs text-green-600 font-semibold">Active</p>
+                    )}
                   </div>
-
                 </div>
 
                 {/* Footer */}
@@ -251,13 +256,12 @@ const Dashboard = ({ user }) => {
           </div>
         )}
       </div>
-
     </div>
   );
-
 };
 
 export default Dashboard;
+
 
 
 

@@ -7,12 +7,15 @@ import { FaHeart } from "react-icons/fa";
 import { GoShareAndroid } from "react-icons/go";
 import { FaWhatsapp } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import {
+    FaUserCircle
+} from "react-icons/fa";
 import axios from 'axios';
 
 
-const BookDetails = ({ user, isLoggedIn,  setWishlist, }) => {
+const BookDetails = ({ user, isLoggedIn, setWishlist, }) => {
 
-   
+
 
 
     //
@@ -20,26 +23,32 @@ const BookDetails = ({ user, isLoggedIn,  setWishlist, }) => {
     const [book, setBook] = useState(null);
     const [currentImg, setCurrentImg] = useState(0);
     const [bookmarked, setBookmarked] = useState(false);
+    const [recommendedBooks, setRecommendedBooks] = useState([]);
+    const [isZoomed, setIsZoomed] = useState(false);
 
 
- const navigate = useNavigate();
 
 
- useEffect(() => {
-  const storedWishlist = JSON.parse(localStorage.getItem("wishlist")) || [];
-  setBookmarked(storedWishlist.includes(id));
-}, [id]);
+    const navigate = useNavigate();
+
+
+    useEffect(() => {
+        const storedWishlist = JSON.parse(localStorage.getItem("wishlist")) || [];
+        setBookmarked(storedWishlist.includes(id));
+    }, [id]);
 
 
     useEffect(() => {
         const fetchBook = async () => {
             try {
-                const response = await fetch(`http://localhost:3000/api/books/${id}`);
-                const data = await response.json();
-                if (response.ok) setBook(data);
-                else console.error('Failed to fetch book:', data);
+                const response = await axios.get(`http://localhost:3000/api/books/${id}`);
+                const bookData = response.data;
+                setBook(bookData);
+
+                const rec = await axios.get(`http://localhost:3000/api/books/category/${bookData.category}`);
+                setRecommendedBooks(rec.data.filter(b => b._id !== id));
             } catch (err) {
-                console.error(err);
+                console.error("Error fetching book or recommendations:", err);
             }
         };
 
@@ -48,17 +57,18 @@ const BookDetails = ({ user, isLoggedIn,  setWishlist, }) => {
 
 
 
-useEffect(() => {
-  if (book && user && user.id) {
-    fetch(`http://localhost:3000/api/books/${book._id}/view`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ userId: user.id })
-    });
-  }
-}, [book, user]);
+
+    useEffect(() => {
+        if (book && user && user.id) {
+            fetch(`http://localhost:3000/api/books/${book._id}/view`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ userId: user.id })
+            });
+        }
+    }, [book, user]);
 
 
 
@@ -80,7 +90,7 @@ useEffect(() => {
 
 
     //for booklist 
-  
+
 
 
 
@@ -138,43 +148,46 @@ useEffect(() => {
         const whatsappUrl = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(text)}`;
         window.open(whatsappUrl, "_blank");
     };
- 
 
 
-   
 
- 
 
-const handleBookmark = async () => {
-  if (!isLoggedIn) {
-    toast.warning("You have to login first!");
-    setTimeout(() => navigate("/login"), 1000);
-    return;
-  }
 
-  try {
-    if (bookmarked) {
-      await axios.post("http://localhost:3000/api/wishlist/add", {
-        userId: user.id,
-        bookId: id,
-      });
-      setWishlist((prev) => prev.filter((item) => item !== id));
-      toast.success("Added to wishlist");
-    } else {
-      await axios.post("http://localhost:3000/api/wishlist/remove", {
-        userId: user.id,
-        bookId: id,
-      });
-      setWishlist((prev) => [...prev, id]);
-      toast.success("Removed from wishlist");
-    }
 
-    setBookmarked(!bookmarked);
-  } catch (err) {
-    console.error("Error updating wishlist", err);
-    toast.error("Failed to update wishlist");
-  }
-};
+
+    const handleBookmark = async () => {
+        if (!isLoggedIn) {
+            toast.warning("You have to login first!");
+            setTimeout(() => navigate("/login"), 1000);
+            return;
+        }
+
+        try {
+            if (!bookmarked) {
+                // Add to wishlist
+                await axios.post("http://localhost:3000/api/wishlist/add", {
+                    userId: user.id,
+                    bookId: id,
+                });
+                setWishlist((prev) => [...prev, id]);
+                toast.success("Added to wishlist");
+            } else {
+                // Remove from wishlist
+                await axios.post("http://localhost:3000/api/wishlist/remove", {
+                    userId: user.id,
+                    bookId: id,
+                });
+                setWishlist((prev) => prev.filter((item) => item !== id));
+                toast.success("Removed from wishlist");
+            }
+
+            setBookmarked(!bookmarked);
+        } catch (err) {
+            console.error("Error updating wishlist", err);
+            toast.error("Failed to update wishlist");
+        }
+    };
+
 
 
 
@@ -189,35 +202,92 @@ const handleBookmark = async () => {
                 {/* Left Side - Image Slider */}
                 <div className="lg:col-span-2 relative">
                     {/* Main Image with slide buttons */}
-                    <div className="bg-black h-[400px] flex items-center justify-center relative rounded">
+                    <div
+                        className="bg-black h-[450px] flex items-center justify-center relative rounded-md overflow-hidden shadow-lg cursor-zoom-in"
+                        onClick={() => setIsZoomed(true)}
+                    >
                         <img
                             src={book.images[currentImg]}
-                            alt="Current view"
-                            className="w-full h-full object-contain"
-                            style={{ maxHeight: '400px', maxWidth: '100%' }}
+                            alt={`Book Image ${currentImg + 1}`}
+                            className="w-full h-full object-contain transition-transform duration-300 hover:scale-105 mt-8"
+                            style={{ maxHeight: '100%', maxWidth: '100%' }}
                         />
 
-                        {/* Left Button */}
                         <button
-                            onClick={handlePrev}
-                            className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-70 p-2 rounded-full shadow hover:bg-opacity-100 transition"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handlePrev();
+                            }}
+                            className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white text-black bg-opacity-80 p-3 rounded-full shadow-md hover:bg-opacity-100 hover:scale-105 transition duration-200"
                         >
-                            <FaChevronLeft size={20} />
+                            <FaChevronLeft size={22} />
                         </button>
 
-                        {/* Right Button */}
                         <button
-                            onClick={handleNext}
-                            className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-70 p-2 rounded-full shadow hover:bg-opacity-100 transition"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleNext();
+                            }}
+                            className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white text-black bg-opacity-80 p-3 rounded-full shadow-md hover:bg-opacity-100 hover:scale-105 transition duration-200"
                         >
-                            <FaChevronRight size={20} />
+                            <FaChevronRight size={22} />
                         </button>
 
-                        {/* Counter */}
-                        <div className="absolute bottom-2 right-2 text-white text-sm">
+                        <div className="absolute bottom-3 right-4 bg-black bg-opacity-60 text-white text-sm px-3 py-1 rounded-full shadow">
                             {currentImg + 1} / {book.images.length}
                         </div>
                     </div>
+                    {/* Zoomed Image Modal */}
+                    {isZoomed && (
+                        <div className="fixed inset-0 z-50 bg-black bg-opacity-80 flex items-center justify-center">
+                            <img
+                                src={book.images[currentImg]}
+                                alt={`Zoomed Book Image`}
+                                className="max-h-[80%] max-w-[85%] object-contain transform scale-100 transition duration-300"
+                            />
+
+                            {/* Close Button */}
+                            <button
+                                onClick={() => setIsZoomed(false)}
+                                className="absolute top-4 right-4 text-white text-3xl font-bold hover:text-red-400"
+                            >
+                                &times;
+                            </button>
+
+                            {/* Prev/Next Arrows */}
+                            <button
+                                onClick={handlePrev}
+                                className="absolute left-5 top-1/2 transform -translate-y-1/2 bg-white text-black bg-opacity-70 p-2 rounded-full hover:scale-110"
+                            >
+                                <FaChevronLeft size={24} />
+                            </button>
+                            <button
+                                onClick={handleNext}
+                                className="absolute right-5 top-1/2 transform -translate-y-1/2 bg-white text-black bg-opacity-70 p-2 rounded-full hover:scale-110"
+                            >
+                                <FaChevronRight size={24} />
+                            </button>
+                            <div className="absolute bottom-5 left-1/2 transform -translate-x-1/2 w-full px-6">
+                                <div className="flex gap-3 overflow-x-auto justify-center scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-gray-300">
+                                    {book.images.map((img, i) => (
+                                        <img
+                                            key={i}
+                                            src={img}
+                                            alt={`Thumb ${i}`}
+                                            className={`w-20 h-20 object-cover rounded-md cursor-pointer border-2 transition-transform duration-300 ${currentImg === i
+                                                ? 'border-blue-500 shadow-lg scale-105'
+                                                : 'border-gray-400 hover:scale-105'
+                                                }`}
+                                            onClick={() => setCurrentImg(i)}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+
+
 
                     {/* Thumbnails */}
                     <div className="mt-3 flex gap-2 overflow-x-auto">
@@ -232,32 +302,48 @@ const handleBookmark = async () => {
                         ))}
                     </div>
 
+
+
+
                     {/* Description */}
-                    <div className="mt-6 bg-white p-4 rounded shadow">
-                        <h2 className="text-lg font-semibold mb-2">Description</h2>
-                        <p className="text-sm text-gray-700">{book.description}</p>
+                    <div className="mt-6 bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                        <h2 className="text-xl font-bold mb-4 text-gray-800 border-b pb-2">📘 Description</h2>
+                        <p className="text-base text-gray-700 leading-relaxed tracking-wide">
+                            {book.description}
+                        </p>
                     </div>
+
                 </div>
 
                 {/* Right Side Info */}
                 <div className="space-y-4">
-                    <div className="bg-white p-4 rounded shadow space-y-2 relative">
+                    <div className="bg-white p-5 rounded-xl shadow-lg border border-gray-200 relative space-y-2">
                         {/* Top Right Icons */}
-                        <div className="absolute top-3 right-3 flex space-x-3 text-gray-600 text-lg">
-                            <button onClick={handleShare}>
-                                <GoShareAndroid className="text-2xl font-bold hover:bg-cyan-200 rounded-3xl" />
+                        <div className="absolute top-4 right-4 flex gap-3 text-gray-600">
+                            <button
+                                onClick={handleShare}
+                                title="Share"
+                                className="p-2 rounded-full hover:bg-cyan-100 transition duration-200"
+                            >
+                                <GoShareAndroid className="text-[24px] font-bold text-black" />
                             </button>
-                            <button onClick={handleBookmark}>
+                            <button
+                                onClick={handleBookmark}
+                                title="Save to Wishlist"
+                                className="p-2 rounded-full transition duration-300"
+                            >
                                 <FaHeart
-                                    className={`text-2xl font-bold cursor-pointer transition-colors duration-300 ${!bookmarked ? "text-red-600" : "text-gray-400 hover:text-red-600"
+                                    className={`text-[24px] font-bold transition-colors duration-300 ${bookmarked ? "text-red-600" : "text-gray-400 hover:text-red-600"
                                         }`}
                                 />
                             </button>
                         </div>
 
                         {/* Book Info */}
-                        <h2 className="text-2xl font-bold text-black">₹ {book.price}</h2>
-                        <p className="text-md text-gray-700">{book.title}</p>
+
+                        <h2 className="text-2xl font-bold text-gray-800 mt-2">₹ {book.price}</h2>
+                        <p className="text-lg font-medium text-gray-700">{book.title}</p>
+                        <p className="text-sm text-indigo-900 truncate italic">by: {book.author || "Unknown Author"}</p>
                         <p className="text-sm text-gray-500">
                             {book.city}, {book.state}
                         </p>
@@ -266,70 +352,121 @@ const handleBookmark = async () => {
                         </p>
                     </div>
 
-                    <div className="bg-white p-4 rounded shadow">
-                        <p className="font-semibold">
-                            Posted by {(book.user.name || 'Unknown').toUpperCase()}
-                        </p>
-                        <p className="text-sm text-gray-500">Member since Jun 2025</p>
 
-                        {/* Check if current logged-in user is the owner */}
-                        {user && book.user._id === user.id ? (
-                            <>
-                                {/* Owner Options */}
-                                <div className="mt-3 flex flex-col gap-2">
-
-                                    <div className="flex gap-2">
-                                        <Link to={`/edit/${id}`} className="flex-1">
-                                            <button className="w-full border border-blue-500 text-blue-500 py-2 rounded hover:bg-blue-50 transition">
-                                                Edit
-                                            </button>
-                                        </Link>
-                                        <button
-                                            onClick={handleDelete}
-                                            className="flex-1 border border-red-500 text-red-500 py-2 rounded hover:bg-red-50 transition"
-                                        >
-                                            Remove
-                                        </button>
+                    <div className="bg-white p-5 rounded-xl shadow-lg border border-gray-200">
+                        {/* Profile Info */}
+                        <div className="flex items-center gap-4 mb-3">
+                            <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-yellow-400 shadow-md">
+                                {book.user?.profilePic ? (
+                                    <img
+                                        src={book.user.profilePic}
+                                        alt="Profile"
+                                        className="w-full h-full object-cover"
+                                    />
+                                ) : (
+                                    <div className="bg-yellow-400 w-full h-full flex items-center justify-center text-white text-xl">
+                                        <FaUserCircle className="text-2xl" />
                                     </div>
+                                )}
+                            </div>
+
+                            <div>
+                                <p className="font-semibold text-gray-900">
+                                    Posted by {(book.user.name || "Unknown").toUpperCase()}
+                                </p>
+                                <span className="text-sm text-gray-600">
+                                    member since{" "}
+                                    {book.user?.createdAt
+                                        ? new Date(book.user.createdAt).toLocaleDateString("en-US", {
+                                            year: "numeric",
+                                            month: ("short").toLowerCase(),
+                                        })
+                                        : "N/A"}
+                                </span>
+
+                            </div>
+                        </div>
+
+                        {/* Actions Based on Ownership */}
+                        {user && book.user._id === user.id ? (
+                            // Owner Actions
+                            <div className="mt-4 flex flex-col gap-2">
+                                <div className="flex gap-3">
+                                    <Link to={`/edit/${id}`} className="w-1/2">
+                                        <button className="w-full border border-blue-500 text-blue-500 py-2 rounded hover:bg-blue-50 transition">
+                                            Edit
+                                        </button>
+                                    </Link>
+                                    <button
+                                        onClick={handleDelete}
+                                        className="w-1/2 border border-red-500 text-red-500 py-2 rounded hover:bg-red-50 transition"
+                                    >
+                                        Remove
+                                    </button>
                                 </div>
-                            </>
+                            </div>
                         ) : (
-                            <>
-                                {/* Non-owner option */}
-
-                                <button
-                                    onClick={handlewpShare}
-                                    className="mt-3 w-full flex items-center justify-center gap-2 bg-green-500 text-white py-2 px-4 rounded-lg shadow hover:bg-green-600 transition duration-300 ease-in-out"
-                                >
-                                    <FaWhatsapp className="text-xl" />
-                                    <span className="font-medium">Chat with Seller</span>
-                                </button>
-
-
-
-                            </>
+                            // Non-owner Action: WhatsApp Chat
+                            <button
+                                onClick={handlewpShare}
+                                className="mt-4 w-full flex items-center justify-center gap-2 bg-green-500 text-white py-2 px-4 rounded-lg shadow hover:bg-green-600 transition duration-300 ease-in-out"
+                            >
+                                <FaWhatsapp className="text-xl" />
+                                <span className="font-medium">Chat with Seller</span>
+                            </button>
                         )}
                     </div>
 
 
-                    <div className="bg-white p-4 rounded shadow">
-                        <h3 className="font-semibold mb-1">Posted in</h3>
-                        <p className="text-sm text-gray-600 mb-2">{book.city}, {book.state}, {book.pincode}</p>
-                        <iframe
-                            src={`https://www.google.com/maps?q=${book.city || 'Pune'}+${book.pincode || '411001'}&z=15&output=embed`}
-                            frameBorder="0"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            width="100%"
-                            height="200"
-                            className="rounded"
-                            allowFullScreen
-                            loading="lazy"
-                            title="Location map"
-                        ></iframe>
 
+                    <div className="bg-white p-5 rounded-xl shadow border border-gray-200 space-y-3">
+                        <h3 className="text-lg font-bold text-gray-800"> Posted Location</h3>
+
+                        <p className="text-sm text-gray-600">
+                            {book.city}, {book.state}, {book.pincode}
+                        </p>
+
+                        <div className="overflow-hidden rounded-sm border border-gray-300">
+                            <iframe
+                                src={`https://www.google.com/maps?q=${book.city || 'Pune'}+${book.pincode || '411001'}&z=15&output=embed`}
+                                frameBorder="0"
+                                width="100%"
+                                height="200"
+                                className="w-full rounded"
+                                allowFullScreen
+                                loading="lazy"
+                                title="Location map"
+                            ></iframe>
+                        </div>
                     </div>
+
                 </div>
             </div>
+            {/* ⭐ Recommended Books Section */}
+<div className="mt-12 max-w-7xl mx-auto px-4">
+  <h2 className="text-2xl font-bold text-gray-900 mb-6 border-b pb-2">
+    📚 Recommended Books
+  </h2>
+
+  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+    {recommendedBooks.map((recBook) => (
+      <Link to={`/book/${recBook._id}`} key={recBook._id}>
+        <div className="bg-white rounded-xl shadow-md hover:shadow-xl hover:scale-[1.02] transition-all duration-300 p-4 border border-gray-100">
+          <img
+            src={recBook.images[0]}
+            alt={recBook.title}
+            className="w-full h-44 object-cover rounded-lg mb-3"
+          />
+          <h3 className="text-lg font-bold text-gray-800 line-clamp-2">{recBook.title}</h3>
+          <p className="text-sm text-gray-500 mb-1">by {recBook.author || "Unknown"}</p>
+          <p className="text-base font-semibold text-green-600">₹ {recBook.price}</p>
+        </div>
+      </Link>
+    ))}
+  </div>
+</div>
+
+
         </div>
     );
 };

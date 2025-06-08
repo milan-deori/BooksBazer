@@ -92,57 +92,54 @@ const Home = ({ user, setWishlist }) => {
       {/* Cards Section */}
       <div className="w-full max-w-screen-2xl mx-auto px-4 py-6">
         <h1 className="text-2xl font-semibold text-gray-800 ">Fresh Recommendations</h1>
-         <hr className="my-2 border-gray-600 mb-4" /> 
+        <hr className="my-2 border-gray-600 mb-4" />
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
           {books.map((book) => {
             const isBookmarked = fullUser?.wishlist?.includes(book._id);
             return (
               <Link to={`/book/${book._id}`} key={book._id}>
-  <div className="bg-white rounded-md border border-gray-300 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden relative flex flex-col p-3 hover:scale-[1.02]">
-    
-    {/* Bookmark Icon */}
-    <button
-      className="absolute top-3 right-3 z-10 bg-white rounded-full p-2 shadow-md hover:bg-red-50 transition"
-      onClick={(e) => handleBookmark(book._id, e)}
-    >
-      <FaHeart
-        className={`text-lg transition ${
-          isBookmarked ? "text-red-600" : "text-gray-400 hover:text-red-600"
-        }`}
-      />
-    </button>
+                <div className="bg-white rounded-md border border-gray-300 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden relative flex flex-col p-3 hover:scale-[1.02]">
 
-    {/* Image Section */}
-    <div className="w-full h-44 bg-gray-200 rounded-md overflow-hidden">
-      <img
-        src={book.images[0]}
-        alt={book.title}
-        className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-      />
-    </div>
+                  {/* Bookmark Icon */}
+                  <button
+                    className="absolute top-3 right-3 z-10 bg-white rounded-full p-2 shadow-md hover:bg-red-50 transition"
+                    onClick={(e) => handleBookmark(book._id, e)}
+                  >
+                    <FaHeart
+                      className={`text-lg transition ${isBookmarked ? "text-red-600" : "text-gray-400 hover:text-red-600"
+                        }`}
+                    />
+                  </button>
 
-    {/* Info Section */}
-    <div className="flex flex-col justify-between mt-3 px-2 flex-grow text-sm text-gray-700 space-y-2">
-      <h2 className="text-base font-extrabold text-gray-900">₹ {book.price}</h2>
+                  {/* Image Section */}
+                  <div className="w-full h-44 bg-gray-200 rounded-md overflow-hidden">
+                    <img
+                      src={book.images[0]}
+                      alt={book.title}
+                      className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                    />
+                  </div>
 
-      <p className="font-medium truncate">{book.title}</p>
+                  {/* Info Section */}
+                  <div className="flex flex-col justify-between mt-3 px-2 flex-grow text-sm text-gray-700 space-y-2">
+                    <h2 className="text-base font-extrabold text-gray-900">₹ {book.price}</h2>
 
-      {/* Author styled distinctly */}
-      <p className="font-semibold text-indigo-900 truncate">
-        Author: {book.author || "Unknown"}
-      </p>
+                    <p className="font-medium truncate">{book.title}</p>
 
-      {/* Bottom info */}
-      <div className="flex justify-between items-center text-xs text-gray-500 pt-2 border-t border-gray-200 mt-auto">
-        <span>{book.city}, {book.state}</span>
-        <span>{formatDate(book.createdAt)}</span>
-      </div>
-    </div>
-  </div>
-</Link>
+                    {/* Author styled distinctly */}
+                    <p className="font-semibold text-indigo-900 truncate italic">
+                      by:  {book.author || "Unknown"}
+                    </p>
 
-
+                    {/* Bottom info */}
+                    <div className="flex justify-between items-center text-xs text-gray-500 pt-2 border-t border-gray-200 mt-auto">
+                      <span>{book.city}, {book.state}</span>
+                      <span>{formatDate(book.createdAt)}</span>
+                    </div>
+                  </div>
+                </div>
+              </Link>
             );
           })}
         </div>
