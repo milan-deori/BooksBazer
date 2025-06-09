@@ -14,9 +14,8 @@ const app = express();
 
 // ---------- MIDDLEWARE ----------
 allowedOrigins = [
-    "http://localhost",
+    "https://booksfindr.somestudys.in",
     'http://localhost:5173',
-    'https://booksfindr.somestudys.in',
     'https://booksfindr.somestudys.in/'           
 ]
 app.use(express.json());
