@@ -14,9 +14,9 @@ const app = express();
 
 // ---------- MIDDLEWARE ----------
 allowedOrigins = [
-    "https://somestudys.in/signup",
+    "https://somestudys.in",
     'http://localhost:5173',
-    'https://somestudys.in/signup/'           
+    'https://somestudys.in/'           
 ]
 // ✅ Increase payload limit
 app.use(express.json({ limit: '50mb' }));
