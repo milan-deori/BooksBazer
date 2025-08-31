@@ -18,12 +18,13 @@ router.post('/signup', async (req, res) => {
     const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // OTP valid for 10 minutes
     // Create a transporter for sending emails
     const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user:"milandeori803@gmail.com", // Your email address
-        pass:"cgow jewm esci mtyq" // Your email password or app password
-      }
-    });
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
+
     // Send OTP email
     const mailOptions = {
       from: "milandeori803@gmail.com", // Your email address
